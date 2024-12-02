@@ -54,7 +54,7 @@ def sign_up():
                 "password": generate_password_hash(password1, method='pbkdf2:sha256'),
                 "name": name
             }
-            response = requests.put(BASE + "/0", json=new_user)
+            response = requests.put(BASE + "0", json=new_user)
             if response.status_code == 201:
                 flash('Account created successfully!', category='success')
                 return redirect(url_for('auth.login'))
