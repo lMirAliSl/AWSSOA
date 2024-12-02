@@ -14,7 +14,7 @@ def home():
         requests.patch(BASE_CALC, json={"expense": float(expense), "user_name": current_user.name})
         return redirect(url_for('views.home'))
 
-    # Отримуємо поточний бюджет та історію витрат із CalculationService
+    # Отримуємо поточний бюджет та історію витрат із BudgetService
     budget_data = requests.get(BASE_CALC).json()
     total_budget = budget_data.get("total_budget", 0)
     expenses = budget_data.get("expenses", [])
