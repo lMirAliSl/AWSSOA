@@ -5,7 +5,7 @@ import requests
 from . import UserModel
 
 auth = Blueprint('auth', __name__)
-BASE = "http://127.0.0.1:5001/"
+BASE = "http://127.0.0.1:5001/userDB"
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -54,7 +54,7 @@ def sign_up():
                 "password": generate_password_hash(password1, method='pbkdf2:sha256'),
                 "name": name
             }
-            response = requests.put(BASE + "0", json=new_user)
+            response = requests.put(BASE + "/0", json=new_user)
             if response.status_code == 201:
                 flash('Account created successfully!', category='success')
                 return redirect(url_for('auth.login'))
