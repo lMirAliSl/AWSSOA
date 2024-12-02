@@ -1,0 +1,105 @@
+/* General body styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    color: #333333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Navbar adjustments */
+.navbar {
+    background-color: #002855;
+    margin-bottom: 20px;
+}
+
+.navbar .nav-link {
+    color: #ffffff;
+    font-weight: bold; /* Жирный шрифт для всех ссылок в навигации */
+}
+
+.navbar .nav-link:hover {
+    color: #f8f9fa;
+}
+
+/* Form styling */
+form {
+    max-width: 400px;
+    margin: 20px auto;
+    background: transparent; /* Прозрачный фон для формы */
+    padding: 10px; /* Меньшие отступы */
+    border-radius: 8px;
+    box-shadow: none; /* Убирает тень */
+}
+
+/* Submit Button */
+.btn-primary {
+    background-color: #002855;
+    border-color: #002855;
+}
+
+.btn-primary:hover {
+    background-color: #001d3d;
+    border-color: #001d3d;
+}
+
+/* Reset Button (Equal Red and White Parts) */
+.btn-danger {
+    background-color: #dc3545; /* Красный фон */
+    border-color: #dc3545; /* Красная рамка */
+    color: #ffffff; /* Белый текст */
+    font-size: 0.8rem; /* Уменьшенный шрифт */
+    padding: 6px 12px; /* Равномерные отступы */
+    cursor: pointer;
+    border-radius: 4px; /* Округленные углы */
+    text-decoration: none; /* Без подчеркивания */
+}
+
+.btn-danger:hover {
+    background-color: #c82333; /* Темно-красный при наведении */
+    border-color: #bd2130; /* Темно-красная рамка при наведении */
+}
+
+/* Home Page Specific Styles */
+h1, h2, h3 {
+    text-align: center;
+    color: #002855;
+}
+
+.table {
+    margin: 20px auto;
+    max-width: 600px;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #333333;
+}
+
+.table th {
+    background-color: #002855;
+    color: #ffffff;
+    text-align: center;
+}
+
+.table td {
+    text-align: center;
+    color: #333333;
+}
+
+/* Reset Button Positioning */
+#reset-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    form {
+        width: 90%;
+    }
+
+    .table {
+        width: 100%;
+    }
+}

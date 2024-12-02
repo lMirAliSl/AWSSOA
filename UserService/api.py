@@ -8,7 +8,7 @@ api = Api(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 
-# Модель UserModel без полів age і weight
+# Модель UserModel
 class UserModel(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(100), nullable=False)
@@ -21,19 +21,19 @@ class UserModel(db.Model, UserMixin):
 with app.app_context():
     db.create_all()
 
-# Аргументи для створення нового користувача
+# Аргументы для создания нового пользователя
 user_put_args = reqparse.RequestParser()
 user_put_args.add_argument("email", type=str, help="User email", required=True)
 user_put_args.add_argument("password", type=str, help="User password", required=True)
 user_put_args.add_argument("name", type=str, help="User name", required=True)
 
-# Аргументи для оновлення користувача
+# Аргументы для обновления пользователя
 user_update_args = reqparse.RequestParser()
 user_update_args.add_argument("email", type=str, help="User email")
 user_update_args.add_argument("password", type=str, help="User password")
 user_update_args.add_argument("name", type=str, help="User name")
 
-# Поля для відповіді
+# Поля для ответа
 resource_fields = {
     'id': fields.Integer,
     'email': fields.String,
@@ -44,7 +44,6 @@ resource_fields = {
 class UserDB(Resource):
     @marshal_with(resource_fields)
     def get(self, user_id=None):
-        # Якщо email передано в параметрах, шукаємо за email
         email = request.args.get('email')
         if email:
             result = UserModel.query.filter_by(email=email).first()
@@ -52,11 +51,35 @@ class UserDB(Resource):
                 abort(404, message="User with this email not found")
             return result
 
-        # Інакше шукаємо за user_id
         result = UserModel.query.filter_by(id=user_id).first()
         if not result:
             abort(404, message="Could not find user with that id")
         return result
+
+    @marshal_with(resource_fields)
+    def put(self, user_id):
+        args = user_put_args.parse_args()
+
+        # Проверка: существует ли пользователь с данным ID
+        existing_user = UserModel.query.filter_by(id=user_id).first()
+        if existing_user:
+            abort(409, message="User with this ID already exists.")
+
+        # Проверка: существует ли пользователь с данным email
+        existing_email = UserModel.query.filter_by(email=args['email']).first()
+        if existing_email:
+            abort(409, message="User with this email already exists.")
+
+        # Создаем нового пользователя
+        user = UserModel(
+            id=user_id,
+            email=args['email'],
+            password=args['password'],
+            name=args['name']
+        )
+        db.session.add(user)
+        db.session.commit()
+        return user, 201
 
     @marshal_with(resource_fields)
     def patch(self, user_id):
@@ -70,8 +93,6 @@ class UserDB(Resource):
             result.password = args['password']
         if args['name']:
             result.name = args['name']
-        # Видалено обробку полів `age` та `weight`
-
         db.session.commit()
         return result
 
