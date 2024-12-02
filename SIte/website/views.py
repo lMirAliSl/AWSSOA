@@ -2,8 +2,8 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 import requests
 
-views = Blueprint('views')
-BASE_CALC = "http://127.0.0.1:5002/"
+views = Blueprint('views', __name__)
+BASE_CALC = "http://127.0.0.1:5002"
 
 @views.route('/', methods=['GET', 'POST'])
 @login_required
