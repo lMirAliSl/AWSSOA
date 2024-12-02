@@ -4,7 +4,7 @@ from os import path
 from flask_login import LoginManager, UserMixin
 import requests
 
-BASE = "http://192.168.1.123:5001/"
+BASE = "http://127.0.0.1:5001/"
 
 db = SQLAlchemy()
 

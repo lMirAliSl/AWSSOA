@@ -5,7 +5,7 @@ import requests
 from . import UserModel
 
 auth = Blueprint('auth', __name__)
-BASE = "http://192.168.1.123:5001/userDB"
+BASE = "http://127.0.0.1:5001/userDB"
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
