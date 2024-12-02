@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 import requests
 
 views = Blueprint('views')
-BASE_CALC = "http://127.0.0.1:5002/budget"
+BASE_CALC = "http://127.0.0.1:5002/"
 
 @views.route('/', methods=['GET', 'POST'])
 @login_required
