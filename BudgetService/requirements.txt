@@ -1,5 +1,6 @@
 flask
-flask-restful
-Flask-SQLAlchemy
-flask-login
-requests
+flask_restful
+flask_login
+flask_sqlalchemy
+psycopg2-binary
+flask-session
