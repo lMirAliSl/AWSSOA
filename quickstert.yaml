@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation Template for Flask Application with EC2 and Security Group settings
+
+Resources:
+  FlaskEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      KeyName: MoneyKey2
+      ImageId: ami-0084a47cc718c111a
+      SecurityGroupIds:
+        - !Ref FlaskSecurityGroup
+      UserData: 
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          sudo apt update -y
+          sudo apt install postgresql-client -y
+          sudo apt install -y python3 python3-pip git python3.12-venv
+
+          git clone https://github.com/lMirAliSl/AWSSOA.git /home/ubuntu/clouds
+          cd /home/ubuntu/clouds/
+          sudo bash
+
+          cd UserService/
+          python3 -m venv venv_user
+          source venv_user/bin/activate
+          pip install -r requirements.txt
+          nohup python3 api.py > /home/ubuntu/clouds/user_service.log 2>&1 &
+          deactivate
+
+          cd ../BudgetService/
+          python3 -m venv venv_calc
+          source venv_calc/bin/activate
+          pip install -r requirements.txt
+          nohup python3 api.py > /home/ubuntu/clouds/calc_service.log 2>&1 &
+          deactivate
+
+          cd ../SIte/
+          python3 -m venv venv_web
+          source venv_web/bin/activate
+          pip install -r requirements.txt
+          nohup python3 main.py > /home/ubuntu/clouds/web_interface.log 2>&1 &
+          deactivate
+
+  FlaskSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP, HTTPS, and Flask services access
+      SecurityGroupIngress:
+        # SSH (22)
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        # HTTP (80)
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        # HTTPS (443)
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        # Flask ports (5000-5002)
+        - IpProtocol: tcp
+          FromPort: 5000
+          ToPort: 5002
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  InstancePublicIP:
+    Description: Public IP of the Flask EC2 instance
+    Value: !GetAtt FlaskEC2Instance.PublicIp

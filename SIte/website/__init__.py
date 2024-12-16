@@ -1,17 +1,34 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from os import path
 from flask_login import LoginManager, UserMixin
 import requests
 
-BASE = "http://127.0.0.1:5001/"
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'hjshjhdjah kjshkjdhjs'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://flask_user:Nikolas2815@userdb.c54yg0ggumzr.eu-central-1.rds.amazonaws.com:5432/user_db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy()
+db = SQLAlchemy(app)
 
+class UserModel(db.Model, UserMixin):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+
+    def get_id(self):
+        return str(self.id)
+
+    def json(self):
+        return {
+            "id": self.id,
+            "email": self.email,
+            "password": self.password,
+            "name": self.name
+        }
 
 def create_app():
-    app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'hjshjhdjah kjshkjdhjs'
 
     from .views import views
     from .auth import auth
@@ -24,35 +41,7 @@ def create_app():
     login_manager.init_app(app)
 
     @login_manager.user_loader
-    def load_user(id):
-        user_data = requests.get(BASE + "userDB/" + id).json()
-        if 'id' in user_data:
-            user_id = user_data['id']
-        else:
-            return None
-        if 'email' in user_data:
-            user_email = user_data['email']
-        if 'password' in user_data:
-            user_password = user_data['password']
-        if 'name' in user_data:
-            user_name = user_data['name']
-
-        # Створюємо користувача без полів age та weight
-        user = UserModel(
-            id=user_id,
-            email=user_email,
-            password=user_password,
-            name=user_name
-        )
-        return user
+    def load_user(user_id):
+        return UserModel.query.get(int(user_id))
 
     return app
-
-
-class UserModel(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), nullable=False)
-    password = db.Column(db.String(100), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-
-
