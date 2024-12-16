@@ -11,6 +11,7 @@ db = SQLAlchemy(app)
 
 # Модель UserModel
 class UserModel(db.Model, UserMixin):
+    __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(100), nullable=False)
