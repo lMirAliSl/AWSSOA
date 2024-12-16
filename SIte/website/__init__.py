@@ -13,9 +13,9 @@ db = SQLAlchemy(app)
 class UserModel(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    email = db.Column(db.String(100), nullable=False)
-    password = db.Column(db.String(100), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(200), nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    name = db.Column(db.String(200), nullable=False)
 
     def get_id(self):
         return str(self.id)

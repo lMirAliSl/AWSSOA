@@ -18,7 +18,7 @@ class BudgetModel(db.Model):
 class ExpenseModel(db.Model):
     __tablename__ = 'expenses'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_name = db.Column(db.String(100), nullable=False)  # Ім'я користувача
+    user_name = db.Column(db.String(200), nullable=False)  # Ім'я користувача
     expense_amount = db.Column(db.Float, nullable=False)  # Сума витрат
 
 with app.app_context():
