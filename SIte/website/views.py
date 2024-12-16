@@ -1,6 +1,9 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
+import json
 import requests
+from . import UserModel
+from . import db
 
 views = Blueprint('views', __name__)
 BASE_CALC = "http://127.0.0.1:5002/budget"
@@ -10,8 +13,15 @@ BASE_CALC = "http://127.0.0.1:5002/budget"
 def home():
     if request.method == 'POST':
         expense = request.form.get('expense')
-        # Передаємо ім'я користувача разом із витратами
-        requests.patch(BASE_CALC, json={"expense": float(expense), "user_name": current_user.name})
+        if expense:
+            user = UserModel.query.filter_by(user_id=current_user.user_id).first()
+            if user:
+                # Збереження витрат у базу даних
+                user.expense = float(expense)
+                db.session.commit()
+
+            # Передаємо ім'я користувача разом із витратами до зовнішнього сервісу
+            requests.patch(BASE_CALC, json={"expense": float(expense), "user_name": current_user.name})
         return redirect(url_for('views.home'))
 
     # Отримуємо поточний бюджет та історію витрат із BudgetService
@@ -23,6 +33,9 @@ def home():
 @views.route('/reset', methods=['POST'])
 @login_required
 def reset_budget():
-    # Викликаємо API для скидання бюджету
-    requests.post(BASE_CALC)
+    # Скидаємо бюджет у базі даних
+    users = UserModel.query.all()
+    for user in users:
+        user.expense = 0
+    db.session.commit()
     return redirect(url_for('views.home'))
