@@ -12,20 +12,20 @@ db = SQLAlchemy(app)
 
 class UserModel(db.Model, UserMixin):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    email = db.Column(db.String(200), nullable=False)
-    password = db.Column(db.String(200), nullable=False)
-    name = db.Column(db.String(200), nullable=False)
+    user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_email = db.Column(db.String(200), nullable=False)
+    user_password = db.Column(db.String(200), nullable=False)
+    user_name = db.Column(db.String(200), nullable=False)
 
     def get_id(self):
-        return str(self.id)
+        return str(self.user_id)
 
     def json(self):
         return {
-            "id": self.id,
-            "email": self.email,
-            "password": self.password,
-            "name": self.name
+            "id": self.user_id,
+            "email": self.user_email,
+            "password": self.user_password,
+            "name": self.user_name
         }
 
 def create_app():
@@ -41,7 +41,7 @@ def create_app():
     login_manager.init_app(app)
 
     @login_manager.user_loader
-    def load_user(id):
-        return UserModel.query.get(int(id))
+    def load_user(user_id):
+        return UserModel.query.get(int(user_id))
 
     return app

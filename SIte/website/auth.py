@@ -17,7 +17,7 @@ def login():
 
         if user:
             # Перевірка пароля
-            if user.password == password:
+            if user.user_password == password:
                 flash('Logged in successfully!', category='success')
                 login_user(user, remember=True)
                 return redirect(url_for('views.home'))

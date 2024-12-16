@@ -21,7 +21,7 @@ def home():
                 db.session.commit()
 
             # Передаємо ім'я користувача разом із витратами до зовнішнього сервісу
-            requests.patch(BASE_CALC, json={"expense": float(expense), "user_name": current_user.name})
+            requests.patch(BASE_CALC, json={"expense": float(expense), "user_name": current_user.user_name})
         return redirect(url_for('views.home'))
 
     # Отримуємо поточний бюджет та історію витрат із BudgetService
