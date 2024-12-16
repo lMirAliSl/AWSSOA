@@ -17,7 +17,7 @@ def login():
 
         if user:
             # Перевірка пароля
-            if check_password_hash(user.password, password):
+            if user.password == password:
                 flash('Logged in successfully!', category='success')
                 login_user(user, remember=True)
                 return redirect(url_for('views.home'))
@@ -52,7 +52,7 @@ def sign_up():
             # Створення нового користувача
             new_user = UserModel(
                 email=email,
-                password=generate_password_hash(password1, method='pbkdf2:sha256'),
+                password=password1,
                 name=name
             )
             db.session.add(new_user)
