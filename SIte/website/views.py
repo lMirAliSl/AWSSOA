@@ -14,7 +14,7 @@ def home():
     if request.method == 'POST':
         expense = request.form.get('expense')
         if expense:
-            user = UserModel.query.filter_by(user_id=current_user.user_id).first()
+            user = UserModel.query.filter_by(id=current_user.id).first()
             if user:
                 # Збереження витрат у базу даних
                 user.expense = float(expense)
