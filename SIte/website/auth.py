@@ -13,7 +13,7 @@ def login():
         password = request.form.get('password')
 
         # Пошук користувача за email
-        user = UserModel.query.filter_by(email=email).first()
+        user = UserModel.query.filter_by(user_email=email).first()
 
         if user:
             # Перевірка пароля
@@ -37,7 +37,7 @@ def sign_up():
         password2 = request.form.get('password2')
 
         # Перевірки введених даних
-        user = UserModel.query.filter_by(email=email).first()
+        user = UserModel.query.filter_by(user_email=email).first()
         if user:
             flash('Email already exists.', category='error')
         elif len(email) < 4:
