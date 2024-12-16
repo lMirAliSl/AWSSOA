@@ -5,7 +5,8 @@ from flask_login import UserMixin
 
 app = Flask(__name__)
 api = Api(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://flask_user:Nikolas2815@userdb.c54yg0ggumzr.eu-central-1.rds.amazonaws.com:5432/user_db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # Модель UserModel
