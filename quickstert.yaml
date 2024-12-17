@@ -10,6 +10,10 @@ Resources:
       ImageId: ami-0084a47cc718c111a
       SecurityGroupIds:
         - !Ref FlaskSecurityGroup
+      IamInstanceProfile: !Ref EC2InstanceProfile  # Додаємо IAM Instance Profile
+      Tags:
+        - Key: Name
+          Value: flask-app-instance
       UserData: 
         Fn::Base64: !Sub |
           #!/bin/bash
@@ -19,8 +23,7 @@ Resources:
           # Лог для статусу розгортання
           LOG_FILE="/home/ubuntu/deployment_status.log"
           echo "Deployment started: $(date)" > $LOG_FILE
-          
-          # Оновлення системи
+
           sudo apt update -y && echo "System updated successfully." >> $LOG_FILE
           sudo apt install postgresql-client -y && echo "PostgreSQL client installed successfully." >> $LOG_FILE
           sudo apt install -y python3 python3-pip git python3.12-venv && echo "Python and dependencies installed successfully." >> $LOG_FILE
@@ -82,17 +85,17 @@ Resources:
                       "files": {
                           "collect_list": [
                               {
-                                  "file_path": "/home/ubuntu/user_service.log",
+                                  "file_path": "/home/ubuntu/clouds/user_service.log",
                                   "log_group_name": "user_service_logs",
                                   "log_stream_name": "{instance_id}"
                               },
                               {
-                                  "file_path": "/home/ubuntu/parcels_service.log",
-                                  "log_group_name": "parcels_service_logs",
+                                  "file_path": "/home/ubuntu/clouds/calc_service.log",
+                                  "log_group_name": "calc_service_logs",
                                   "log_stream_name": "{instance_id}"
                               },
                               {
-                                  "file_path": "/home/ubuntu/web_interface.log",
+                                  "file_path": "/home/ubuntu/clouds/web_interface.log",
                                   "log_group_name": "web_interface_logs",
                                   "log_stream_name": "{instance_id}"
                               },
@@ -107,7 +110,7 @@ Resources:
               }
           }
           EOT
-
+          
           # Запуск CloudWatch Agent
           sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
               -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json -s && echo "CloudWatch Agent configured successfully." >> $LOG_FILE
