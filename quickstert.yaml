@@ -11,9 +11,6 @@ Resources:
       SecurityGroupIds:
         - !Ref FlaskSecurityGroup
       IamInstanceProfile: !Ref EC2InstanceProfile  # Додаємо IAM Instance Profile
-      Tags:
-        - Key: Name
-          Value: flask-app-instance
       UserData: 
         Fn::Base64: !Sub |
           #!/bin/bash
