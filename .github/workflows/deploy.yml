@@ -21,7 +21,7 @@ jobs:
 
       - name: Validate Repository Files
         run: |
-          REQUIRED_FILES=("user_service.py" "parcels_service.py" "requirements.txt")
+          REQUIRED_FILES=("UserService/api.py" "BudgetService/api.py")
           for FILE in "${REQUIRED_FILES[@]}"; do
             if [ ! -f "$FILE" ]; then
               echo "Error: Missing required file: $FILE"
@@ -92,7 +92,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: eu-central-1
 
       - name: Setup SSH Key
         run: |
@@ -126,7 +126,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ env.PUBLIC_IP }} << 'EOF'
             set -e
             echo "Testing Flask Services..."
-            SERVICES=("user_service.py" "parcels_service.py")
+            SERVICES=("UserService/api.py" "BudgetService/api.py")
             for SERVICE in "${SERVICES[@]}"; do
               echo "Checking for service: $SERVICE"
               if ! pgrep -f "$SERVICE" > /dev/null; then
