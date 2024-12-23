@@ -125,7 +125,7 @@ jobs:
       - name: Test Website Availability
         run: |
           echo "Testing website availability at http://${{ env.PUBLIC_IP }}:5000..."
-          if curl -s --head --request GET http://${{ env.PUBLIC_IP }}:5000 | grep "200 OK" > /dev/null; then
+          if curl -s --head --request GET http://${{ env.PUBLIC_IP }}:5000/login | grep "200 OK" > /dev/null; then
             echo "Website is accessible!"
           else
             echo "Error: Website is not accessible."
