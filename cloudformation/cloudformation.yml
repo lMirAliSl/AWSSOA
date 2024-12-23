@@ -6,7 +6,7 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
-      KeyName: MoneyKey2
+      KeyName: MoneyKey3
       ImageId: ami-0084a47cc718c111a
       SecurityGroupIds:
         - !Ref FlaskSecurityGroup
