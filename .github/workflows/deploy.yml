@@ -57,7 +57,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: eu-central-1
 
       - name: Deploy CloudFormation Stack
         id: cloudformation_deploy
@@ -105,7 +105,7 @@ jobs:
         run: |
           echo "Fetching current Public IP of EC2..."
           PUBLIC_IP=$(aws ec2 describe-instances \
-            --region us-east-1 \
+            --region eu-central-1 \
             --filters "Name=tag:Name,Values=flask-app-instance" "Name=instance-state-name,Values=running" \
             --query "Reservations[*].Instances[*].PublicIpAddress" --output text)
           if [ -z "$PUBLIC_IP" ]; then
