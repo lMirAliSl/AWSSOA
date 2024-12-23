@@ -1,0 +1,155 @@
+name: CI/CD Pipeline for Flask AWS Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # 1. Клонування репозиторію та перевірка цілісності
+  clone_and_validate:
+    name: Clone and Validate Repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Check Directory Structure
+        run: |
+          echo "Current directory: $(pwd)"
+          ls -la
+
+      - name: Validate Repository Files
+        run: |
+          REQUIRED_FILES=("user_service.py" "parcels_service.py" "requirements.txt")
+          for FILE in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "$FILE" ]; then
+              echo "Error: Missing required file: $FILE"
+              exit 1
+            fi
+          done
+          echo "Repository validation successful."
+
+      - name: Save Artifact Locally
+        run: |
+          mkdir -p artifacts
+          zip -r artifacts/flask-app-$(date +%F).zip ./*
+          echo "Artifact created: artifacts/flask-app-$(date +%F).zip"
+
+      - name: Upload Artifact to GitHub Actions
+        uses: actions/upload-artifact@v3
+        with:
+          name: flask-app-artifact
+          path: artifacts/
+          retension-days: 1
+
+  # 2. Деплой інфраструктури через CloudFormation
+  deploy_infrastructure:
+    name: Deploy CloudFormation Infrastructure
+    needs: clone_and_validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS CLI
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy CloudFormation Stack
+        id: cloudformation_deploy
+        run: |
+          echo "Deploying CloudFormation stack..."
+          aws cloudformation deploy \
+            --template-file cloudformation/cloudformation.yml \
+            --stack-name flask-app-stack \
+            --capabilities CAPABILITY_NAMED_IAM
+          echo "CloudFormation stack deployed successfully!"
+
+      - name: Get EC2 Public IP
+        id: get_public_ip
+        run: |
+          PUBLIC_IP=$(aws ec2 describe-instances \
+            --filters "Name=tag:Name,Values=flask-app-instance" "Name=instance-state-name,Values=running" \
+            --query "Reservations[*].Instances[*].PublicIpAddress" --output text)
+          echo "PUBLIC_IP=$PUBLIC_IP" >> $GITHUB_ENV
+          echo "EC2 Public IP: $PUBLIC_IP"
+
+    # 3. Тестування на EC2
+    # 3. Тестування на EC2
+  test_ec2_instance:
+    name: Test EC2 Instance and Services
+    needs: deploy_infrastructure
+    runs-on: ubuntu-latest
+    env:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+    steps:
+      - name: Configure AWS CLI
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Setup SSH Key
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          echo "SSH key setup completed."
+
+      - name: Retrieve EC2 Public IP
+        id: get_ec2_ip
+        run: |
+          echo "Fetching current Public IP of EC2..."
+          PUBLIC_IP=$(aws ec2 describe-instances \
+            --region us-east-1 \
+            --filters "Name=tag:Name,Values=flask-app-instance" "Name=instance-state-name,Values=running" \
+            --query "Reservations[*].Instances[*].PublicIpAddress" --output text)
+          if [ -z "$PUBLIC_IP" ]; then
+            echo "Error: Could not retrieve EC2 Public IP."
+            exit 1
+          fi
+          echo "PUBLIC_IP=$PUBLIC_IP" >> $GITHUB_ENV
+          echo "Public IP: $PUBLIC_IP"
+
+      - name: Wait for EC2 Services
+        run: |
+          echo "Waiting for EC2 services to stabilize..."
+          sleep 70 # Чекаємо 3 хвилини
+
+      - name: Check Running Services on EC2
+        run: |
+          echo "Connecting to EC2 instance at ${PUBLIC_IP}..."
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ env.PUBLIC_IP }} << 'EOF'
+            set -e
+            echo "Testing Flask Services..."
+            SERVICES=("user_service.py" "parcels_service.py")
+            for SERVICE in "${SERVICES[@]}"; do
+              echo "Checking for service: $SERVICE"
+              if ! pgrep -f "$SERVICE" > /dev/null; then
+                echo "Error: Service $SERVICE is not running."
+                exit 1
+              fi
+              echo "Service $SERVICE is running."
+            done
+          EOF
+
+      - name: Test Website Availability
+        run: |
+          echo "Testing website availability at http://${{ env.PUBLIC_IP }}:5000..."
+          if curl -s --head --request GET http://${{ env.PUBLIC_IP }}:5000 | grep "200 OK" > /dev/null; then
+            echo "Website is accessible!"
+          else
+            echo "Error: Website is not accessible."
+            exit 1
+          fi
+
+      - name: Cleanup on Failure
+        if: failure()
+        run: |
+          echo "Tests failed! Deleting CloudFormation stack..."
+          aws cloudformation delete-stack --stack-name flask-app-stack
+          echo "Stack deletion initiated."
