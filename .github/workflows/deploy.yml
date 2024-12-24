@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  # 1. Клонування репозиторію та перевірка цілісност
+  # 1. Клонування репозиторію та перевірка ціліснос
   clone_and_validate:
     name: Clone and Validate Repository
     runs-on: ubuntu-latest
