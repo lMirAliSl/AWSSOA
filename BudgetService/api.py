@@ -14,7 +14,7 @@ class BudgetModel(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     total_budget = db.Column(db.Float, default=30000.0)  # Початковий бюджет
 
-# Модель для історії витрат
+# Модель для історії витр
 class ExpenseModel(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_name = db.Column(db.String(200), nullable=False)  # Ім'я користувача
